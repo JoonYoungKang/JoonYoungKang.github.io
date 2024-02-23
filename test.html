@@ -1,0 +1,143 @@
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@picocss/pico@1/css/pico.min.css">
+    <style>
+        body {
+            background-color: #E9D5FF;
+            color: #5D3FD3;
+        }
+
+        .container {
+            padding: 2rem;
+        }
+
+        button,
+        input[type="submit"] {
+            background-color: #7B61FF;
+            color: white;
+            border: none;
+            padding: 0.5rem 1rem;
+            cursor: pointer;
+        }
+
+        input,
+        textarea {
+            border: 1px solid #5D3FD3;
+        }
+
+        footer {
+            margin-top: 2rem;
+            text-align: center;
+        }
+    </style>
+    <title>PDF Management Tool</title>
+</head>
+
+<body>
+    <nav class="container-fluid">
+        <ul>
+            <li><strong>PDF Tool</strong></li>
+        </ul>
+    </nav>
+    <main class="container">
+        <div class="grid">
+            <section>
+                <hgroup>
+                    <h2>PDF Management</h2>
+                    <h3>Upload and Convert</h3>
+                </hgroup>
+                <p>Upload your PDF file to convert it into a hex string or a base64 string.</p>
+                <input type="file" id="pdfFile" name="pdfFile" accept="application/pdf">
+                <button type="button" onclick="alert('Convert to Hex/String');">Convert</button>
+                <h3>String to PDF Preview and Download</h3>
+                <p>Enter your hex or base64 encoded string to preview and download it as a PDF file.</p>
+                <textarea id="stringInput" placeholder="Enter hex/base64 string here"></textarea>
+                <button type="button" onclick="previewPDF();">Preview</button>
+                <div id="pdfPreviewContainer"></div> <!-- 미리보기 창이 여기에 삽입됩니다 -->
+                <button type="button" onclick="downloadPDF();">Download PDF</button>
+                <h3>Convert to JSON</h3>
+                <p>Convert your PDF file into JSON format for parsing and beautification.</p>
+                <button type="button" onclick="parseToJson()">Parse to JSON</button>
+                <div id="jsonResult"
+                    style="white-space: pre-wrap; background-color: #f4f4f4; padding: 10px; margin-top: 20px; border-radius: 5px;">
+                </div>
+
+            </section>
+        </div>
+    </main>
+    <footer class="container">
+        <small><a href="#">Privacy Policy</a> • <a href="#">Terms of Service</a></small>
+    </footer>
+</body>
+
+<script>
+    // PDF를 Base64로 변환
+    function convertToBase64() {
+        const fileInput = document.getElementById('pdfFile');
+        const file = fileInput.files[0];
+
+        if (file) {
+            const reader = new FileReader();
+            reader.readAsDataURL(file);
+            reader.onload = function () {
+                const result = reader.result;
+                // 여기에 결과를 처리하는 로직을 추가합니다. 예를 들어, 결과를 textarea에 표시합니다.
+                document.getElementById('stringInput').value = result;
+            };
+            reader.onerror = function (error) {
+                console.log('Error: ', error);
+            };
+        }
+    }
+
+    function previewPDF() {
+        const base64String = document.getElementById('stringInput').value;
+        const previewContainer = document.getElementById('pdfPreviewContainer');
+
+        // 미리보기 컨테이너를 초기화합니다.
+        previewContainer.innerHTML = '';
+
+        // iframe을 생성하여 PDF 미리보기를 삽입합니다.
+        const previewFrame = document.createElement('iframe');
+        previewFrame.src = base64String;
+        previewFrame.style.width = "100%";
+        previewFrame.style.height = "600px";
+
+        // 미리보기 컨테이너에 iframe을 추가합니다.
+        previewContainer.appendChild(previewFrame);
+    }
+
+    function parseToJson() {
+        const textAreaValue = document.getElementById('stringInput').value;
+        fetch('https://pdfparser.espider.co.kr/extract-text', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({ pdfData: textAreaValue }),
+        })
+            .then(response => response.json())
+            .then(data => {
+                // 서버로부터 받은 응답을 예쁘게 표시합니다.
+                const formattedJson = JSON.stringify(data, null, 2);
+                // 결과를 위에서 추가한 요소에 표시합니다.
+                document.getElementById('jsonResult').textContent = formattedJson;
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                document.getElementById('jsonResult').textContent = 'An error occurred: ' + error.message;
+            });
+    }
+
+
+
+    // 버튼 이벤트 리스너 추가
+    document.querySelector('button[onclick="alert(\'Convert to Hex/String\');"]').onclick = convertToBase64;
+    document.querySelector('button[onclick="alert(\'Preview PDF\');"]').onclick = previewPDF;
+    document.querySelector('button[onclick="alert(\'Download PDF\');"]').onclick = downloadPDF;
+</script>
+
+</html>
