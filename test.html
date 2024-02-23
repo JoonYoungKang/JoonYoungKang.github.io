@@ -112,10 +112,17 @@
 
     function parseToJson() {
         const textAreaValue = document.getElementById('stringInput').value;
-        fetch('https://pdfparser.espider.co.kr/extract-text', {
+        // CORS Anywhere 프록시 URL을 추가합니다.
+        const proxyUrl = 'https://cors-anywhere.herokuapp.com/';
+        const targetUrl = 'https://pdfparser.espider.co.kr/extract-text'; // 실제 요청하고자 하는 API URL
+        const fullUrl = proxyUrl + targetUrl; // 프록시 서버를 경유하는 전체 URL 구성
+
+        fetch(fullUrl, {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
+                // CORS Anywhere를 사용할 때 추가적인 헤더 설정은 필요하지 않을 수 있습니다.
+                // 요청이 프록시를 통과하므로, 프록시 서버에서 적절한 CORS 헤더를 추가해줍니다.
             },
             body: JSON.stringify({ pdfData: textAreaValue }),
         })
@@ -123,7 +130,6 @@
             .then(data => {
                 // 서버로부터 받은 응답을 예쁘게 표시합니다.
                 const formattedJson = JSON.stringify(data, null, 2);
-                // 결과를 위에서 추가한 요소에 표시합니다.
                 document.getElementById('jsonResult').textContent = formattedJson;
             })
             .catch(error => {
@@ -131,6 +137,7 @@
                 document.getElementById('jsonResult').textContent = 'An error occurred: ' + error.message;
             });
     }
+
 
 
 
