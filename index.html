@@ -39,27 +39,26 @@
 <body>
     <nav class="container-fluid">
         <ul>
-            <li><strong>PDF Tool</strong></li>
+            <li><strong>헥데스크래핑전용</strong></li>
         </ul>
     </nav>
     <main class="container">
         <div class="grid">
             <section>
                 <hgroup>
-                    <h2>PDF Management</h2>
+                    <h2>PDF 변환기</h2>
                     <h3>Upload and Convert</h3>
                 </hgroup>
-                <p>Upload your PDF file to convert it into a hex string or a base64 string.</p>
+                <p>base64나 pdf를 업로드하세요, 파일올리고 컨버트 누르면 base64로 바뀜</p>
                 <input type="file" id="pdfFile" name="pdfFile" accept="application/pdf">
                 <button type="button" onclick="alert('Convert to Hex/String');">Convert</button>
-                <h3>String to PDF Preview and Download</h3>
-                <p>Enter your hex or base64 encoded string to preview and download it as a PDF file.</p>
-                <textarea id="stringInput" placeholder="Enter hex/base64 string here"></textarea>
+                <h3>PDF 미리보기</h3>
+                <p>문자열로 pdf미리보기하고 다운로드하기 할 수 있습니다.</p>
+                <textarea id="stringInput" placeholder="base64 아니면 안댐"></textarea>
                 <button type="button" onclick="previewPDF();">Preview</button>
                 <div id="pdfPreviewContainer"></div> <!-- 미리보기 창이 여기에 삽입됩니다 -->
-                <button type="button" onclick="downloadPDF();">Download PDF</button>
                 <h3>Convert to JSON</h3>
-                <p>Convert your PDF file into JSON format for parsing and beautification.</p>
+                <p>노드서버 결과 테스트해보기, 파일이나 base64값 위에 넣고 누르세요</p>
                 <button type="button" onclick="parseToJson()">Parse to JSON</button>
                 <div id="jsonResult"
                     style="white-space: pre-wrap; background-color: #f4f4f4; padding: 10px; margin-top: 20px; border-radius: 5px;">
@@ -69,7 +68,7 @@
         </div>
     </main>
     <footer class="container">
-        <small><a href="#">Privacy Policy</a> • <a href="#">Terms of Service</a></small>
+        <small><a href="#">스크래핑팀 개발툴입니당</small>
     </footer>
 </body>
 
@@ -95,6 +94,9 @@
 
     function previewPDF() {
         const base64String = document.getElementById('stringInput').value;
+        if(base64String.indexOf("data:application/pdf;base64,") == -1){
+            base64String = "data:application/pdf;base64," + base64String;
+        }
         const previewContainer = document.getElementById('pdfPreviewContainer');
 
         // 미리보기 컨테이너를 초기화합니다.
@@ -111,11 +113,13 @@
     }
 
     function parseToJson() {
-        const textAreaValue = document.getElementById('stringInput').value;
+        var textAreaValue = document.getElementById('stringInput').value;
+        textAreaValue = textAreaValue.replace("data:application/pdf;base64,","");
+        
         // CORS Anywhere 프록시 URL을 추가합니다.
-        const proxyUrl = 'https://cors-anywhere.herokuapp.com/';
-        const targetUrl = 'https://pdfparser.espider.co.kr/extract-text'; // 실제 요청하고자 하는 API URL
-        const fullUrl = proxyUrl + targetUrl; // 프록시 서버를 경유하는 전체 URL 구성
+        var proxyUrl = 'https://cors-anywhere.herokuapp.com/';
+        var targetUrl = 'https://pdfparser.espider.co.kr/extract-text'; // 실제 요청하고자 하는 API URL
+        var fullUrl = proxyUrl + targetUrl; // 프록시 서버를 경유하는 전체 URL 구성
 
         fetch(fullUrl, {
             method: 'POST',
@@ -141,7 +145,7 @@
 
 
 
-    // 버튼 이벤트 리스너 추가
+    // // 버튼 이벤트 리스너 추가
     document.querySelector('button[onclick="alert(\'Convert to Hex/String\');"]').onclick = convertToBase64;
     document.querySelector('button[onclick="alert(\'Preview PDF\');"]').onclick = previewPDF;
     document.querySelector('button[onclick="alert(\'Download PDF\');"]').onclick = downloadPDF;
